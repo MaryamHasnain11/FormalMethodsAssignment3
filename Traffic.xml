@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int N = 4;          // Number of tasks.
+typedef int[0,N-1] pid_t; // Process IDs.
+
+
+chan get_right, release_right;
+
+int[0,N] len = N;
+
+</declaration>
+	<template>
+		<name x="5" y="5">Signal</name>
+		<parameter>const pid_t id</parameter>
+		<declaration>// Place local declarations here.
+clock x;</declaration>
+		<location id="id0" x="544" y="212">
+			<name x="527" y="229">Red</name>
+			<label kind="invariant" x="527" y="246">x&lt;=12</label>
+		</location>
+		<location id="id1" x="544" y="23">
+			<name x="527" y="-25">Green</name>
+			<label kind="invariant" x="535" y="-8">x&lt;=8</label>
+		</location>
+		<location id="id2" x="314" y="25">
+			<name x="331" y="0">begin</name>
+		</location>
+		<init ref="id2"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="guard" x="390" y="178">x&gt;=12</label>
+			<nail x="314" y="212"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="569" y="85">x&gt;=8</label>
+			<label kind="synchronisation" x="561" y="110">release_right!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="391" y="-8">get_right!</label>
+			<label kind="assignment" x="408" y="25">x=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Move</name>
+		<declaration>clock w;</declaration>
+		<location id="id3" x="-586" y="-535">
+			<name x="-596" y="-569">Go</name>
+		</location>
+		<location id="id4" x="-850" y="-535">
+			<name x="-860" y="-569">Stop</name>
+		</location>
+		<init ref="id4"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-756" y="-408">release_right?</label>
+			<label kind="assignment" x="-722" y="-484">w=0</label>
+			<nail x="-697" y="-425"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-765" y="-680">get_right?</label>
+			<nail x="-731" y="-629"/>
+		</transition>
+	</template>
+	<system>
+// List one or more processes to be composed into a system.
+system Signal,Move;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] (Signal(0).Red imply Move.w&lt;=8)
+			</formula>
+			<comment>Signal will turn red after 8 seconds
+			</comment>
+		</query>
+		<query>
+			<formula>A[] not (Signal(0).Green &amp;&amp; Signal(1).Green &amp;&amp; Signal(2).Green &amp;&amp; Signal(3).Green)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
